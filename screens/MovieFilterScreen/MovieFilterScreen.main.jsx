@@ -5,65 +5,45 @@ import {
   View,
   TouchableOpacity,
   Text,
-  Button,
 } from "react-native";
 
-import { getAllActors } from "../../constants/Constants";
 import { styles } from "./MovieFilterScreen.styles";
 
-const ALL_ACTORS = getAllActors();
-
-// Input: navigation & route params, which we recieve through React Navigation
+// Input: navigation & route params, which we receive through React Navigation
 // Output: a Movie Filter Screen component, which displays a list of actors to filter on.
 export default function MovieFilterScreen({ navigation, route }) {
   const [actors, setActors] = useState([]);
+  const ALL_ACTORS = getAllActors(); // Assuming this function returns all available actors.
 
-  // TODO: Destructure navigation params from props.
+  useEffect(() => {
+    // TODO: Receive actors passed by MovieListScreen here, and update
+    // our local state using setActors.
+    if (route.params && route.params.selectedActors) {
+      setActors(route.params.selectedActors);
+    }
+  }, [route.params]);
 
-  useEffect(
-    () => {
-      // TODO: Recieve actors passed by MovieListScreen here, and update
-      // our local state using setActors.
-    },
-    [
-      /* TODO: Insert dependent variables here. */
-    ]
-  );
+  // Handle the "Done" button press to navigate back to MovieListScreen with selected actors.
+  const handleDonePress = () => {
+    // TODO: Pass back the selected actors to MovieListScreen using navigation params.
+    navigation.navigate("MovieList", { selectedActors: actors });
+  };
 
-  useEffect(
-    () => {
-      // TODO: Override the default back button to...
-      //  1) Hide the left button.
-      //  2) Show a "Done" button on the right that navigates back to the MovieListScreen
-      //      and passes back our current list of actors via params.
-      // https://reactnavigation.org/docs/header-buttons/
-    },
-    [
-      /* TODO: Insert dependent state variables here. */
-    ]
-  );
-
-  // When we tap an actor cell, flip the boolean!
+  // When we tap an actor cell, toggle the selection.
   const didTapActorCell = (actor) => {
-    // We use the spread operator here to create a copy of the
-    // actors array. This is typically how we deal with arrays in state,
-    // since we can't directly change the value of the old array
-    // (it won't re-render the screen, AND state is supposed
-    // to be updated ONLY via the setter function!)
     let newActors = [...actors];
     if (actors.includes(actor)) {
-      newActors.splice(newActors.indexOf(actor), 1);
+      newActors = newActors.filter((selectedActor) => selectedActor !== actor);
     } else {
       newActors.push(actor);
     }
     setActors(newActors);
   };
 
-  const renderSelectItem = ({ item, index }) => {
+  const renderSelectItem = ({ item }) => {
     return (
       <TouchableOpacity
         activeOpacity={0.8}
-        key={index}
         onPress={() => didTapActorCell(item)}
       >
         <View style={styles.filtercell}>
@@ -86,6 +66,13 @@ export default function MovieFilterScreen({ navigation, route }) {
           renderItem={renderSelectItem}
           keyExtractor={(item) => item}
         />
+        {/* Add a "Done" button to apply the filter and navigate back to MovieListScreen */}
+        <TouchableOpacity
+          onPress={handleDonePress}
+          style={styles.doneButton}
+        >
+          <Text style={styles.doneButtonText}>Done</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
